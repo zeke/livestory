@@ -14,7 +14,9 @@
     "dotenv": "^16.4.1",
     "download": "^8.0.0",
     "replicate": "*",
-    "strip-ansi": "^7.1.0"
+    "strip-ansi": "^7.1.0",
+    "websocket": "^1.0.34",
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "standard": "^17.1.0"
