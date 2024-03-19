@@ -29,7 +29,7 @@ ws.on("open", () => {
 });
 
 ws.on("message", (data) => {
-  const fileName = `image_coreweave.png`;
+  const fileName = `coreweave_output.png`;
   fs.writeFile(fileName, data, (err) => {
     if (err) {
       console.error(`Error writing file ${fileName}:`, err);
@@ -49,10 +49,24 @@ async function makeReplicateImage(prompt) {
   const input = {
     prompt: prompt,
   };
-  const output = await replicate.run("mistralai/mixtral-8x7b-instruct-v0.1", {
-    input,
-  });
+  const output = await replicate.run(
+    "lucataco/sdxl-lcm:fbbd475b1084de80c47c35bfe4ae64b964294aa7e237e6537eed938cfd24903d",
+    { input }
+  );
+
   console.log(output);
+
+  for (const url of output) {
+    const extension = url.split(".").pop();
+    const urlSegments = url.split("/");
+    const secondToLastSegment = urlSegments[urlSegments.length - 2];
+    const slugifiedPrompt = prompt
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .substring(0, 100);
+    const filename = `replicate_output.png`;
+    await download(url, "./output/", { filename });
+  }
 }
 
 const listen = spawn("sh", ["./listen.sh"]);
@@ -82,4 +96,5 @@ async function generateImage(speechData) {
   }
 
   await makeImage(crazyWhisperPrompt);
+  await makeReplicateImage(crazyWhisperPrompt);
 }
