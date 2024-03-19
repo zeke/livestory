@@ -1,0 +1,22 @@
+{
+  "name": "livestory",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tell a story and get a live feed of images",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "lint": "standard --fix",
+    "test": "standard"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.1",
+    "download": "^8.0.0",
+    "replicate": "*",
+    "strip-ansi": "^7.1.0"
+  },
+  "devDependencies": {
+    "standard": "^17.1.0"
+  }
+}
