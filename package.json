@@ -13,6 +13,7 @@
   "dependencies": {
     "dotenv": "^16.4.1",
     "download": "^8.0.0",
+    "node-webcam": "^0.8.2",
     "replicate": "*",
     "strip-ansi": "^7.1.0",
     "websocket": "^1.0.34",

@@ -6,7 +6,6 @@ import download from "download";
 import path from "path";
 import WebSocket from "ws";
 import fs from "fs";
-
 dotenv.config();
 
 const ws = new WebSocket("ws://100.76.41.44:5000");
@@ -41,7 +40,10 @@ ws.on("message", (data) => {
 
 async function makeImage(prompt) {
   console.log("Running...");
-  ws.send(JSON.stringify({ prompt: prompt }));
+  // Example usage
+  const image = fs.readFileSync("./frames/me.jpg").toString("base64");
+
+  ws.send(JSON.stringify({ prompt, image }));
 }
 
 async function makeReplicateImage(prompt) {
@@ -49,6 +51,7 @@ async function makeReplicateImage(prompt) {
   const input = {
     prompt: prompt,
   };
+
   const output = await replicate.run(
     "lucataco/sdxl-lcm:fbbd475b1084de80c47c35bfe4ae64b964294aa7e237e6537eed938cfd24903d",
     { input }
@@ -96,5 +99,5 @@ async function generateImage(speechData) {
   }
 
   await makeImage(crazyWhisperPrompt);
-  await makeReplicateImage(crazyWhisperPrompt);
+  //   await makeReplicateImage(crazyWhisperPrompt);
 }
