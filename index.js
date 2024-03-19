@@ -1,103 +1,105 @@
-import { spawn } from "child_process";
-import stripAnsi from "strip-ansi";
-import Replicate from "replicate";
-import dotenv from "dotenv";
-import download from "download";
-import path from "path";
-import WebSocket from "ws";
-import fs from "fs";
-dotenv.config();
+import { spawn } from 'child_process'
+import stripAnsi from 'strip-ansi'
+// import Replicate from "replicate";
+import dotenv from 'dotenv'
+// import download from 'download'
+import path from 'path'
+import WebSocket from 'ws'
+import fs from 'fs'
+dotenv.config()
 
-const ws = new WebSocket("ws://100.76.41.44:5000");
-const replicate = new Replicate();
-const outputDirectory = "./output";
+const ws = new WebSocket('ws://100.76.41.44:5000')
+// const replicate = new Replicate();
+const outputDirectory = './output'
+let frameNumber = 0
 
 // clean up output dir
 fs.readdir(outputDirectory, (err, files) => {
-  if (err) throw err;
+  if (err) throw err
 
   for (const file of files) {
     fs.unlink(path.join(outputDirectory, file), (err) => {
-      if (err) throw err;
-    });
+      if (err) throw err
+    })
   }
-});
+})
 
-ws.on("open", () => {
-  console.log("Connected to WebSocket server");
-});
+ws.on('open', () => {
+  console.log('Connected to WebSocket server')
+})
 
-ws.on("message", (data) => {
-  const fileName = `coreweave_output.png`;
-  fs.writeFile(fileName, data, (err) => {
-    if (err) {
-      console.error(`Error writing file ${fileName}:`, err);
-    } else {
-      console.log(`Image saved as ${fileName}`);
-    }
-  });
-});
+ws.on('message', (data) => {
+  console.log(data, 'log')
+  const uniqueFileName = `coreweave_output_${frameNumber}.jpg`
+  fs.writeFileSync(path.join(outputDirectory, uniqueFileName), data)
+  fs.writeFileSync(path.join(outputDirectory, '_latest.jpg'), data)
+  console.log(`Image saved as ${uniqueFileName}`)
+})
 
-async function makeImage(prompt) {
-  console.log("Running...");
-  // Example usage
-  const image = fs.readFileSync("./frames/me.jpg").toString("base64");
+async function makeImage (prompt) {
+  const lastImagePath = path.join(
+    outputDirectory,
+    `coreweave_output_${frameNumber}.jpg`
+  )
 
-  ws.send(JSON.stringify({ prompt, image }));
+  let image
+
+  if (frameNumber === 0) {
+    // image = fs.readFileSync("./circle.jpg").toString("base64");
+    image = undefined
+  } else if (!fs.existsSync(lastImagePath)) {
+    image = undefined
+  } else {
+    image = fs.readFileSync(lastImagePath).toString('base64')
+  }
+
+  ws.send(JSON.stringify({ prompt, image }))
+  frameNumber += 1
 }
 
-async function makeReplicateImage(prompt) {
-  console.log("Running on replicate");
-  const input = {
-    prompt: prompt,
-  };
+// async function makeReplicateImage(prompt) {
+//   console.log("Running on replicate");
+//   const input = {
+//     prompt,
+//   };
+//   const output = await replicate.run(
+//     "fofr/latent-consistency-model:683d19dc312f7a9f0428b04429a9ccefd28dbf7785fef083ad5cf991b65f406f",
+//     { input }
+//   );
 
-  const output = await replicate.run(
-    "lucataco/sdxl-lcm:fbbd475b1084de80c47c35bfe4ae64b964294aa7e237e6537eed938cfd24903d",
-    { input }
-  );
+//   console.log(output);
 
-  console.log(output);
+//   for (const url of output) {
+//     const filename = "replicate_output.png";
+//     await download(url, "./output/", { filename });
+//   }
+// }
 
-  for (const url of output) {
-    const extension = url.split(".").pop();
-    const urlSegments = url.split("/");
-    const secondToLastSegment = urlSegments[urlSegments.length - 2];
-    const slugifiedPrompt = prompt
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .substring(0, 100);
-    const filename = `replicate_output.png`;
-    await download(url, "./output/", { filename });
-  }
-}
-
-const listen = spawn("sh", ["./listen.sh"]);
-
-listen.stdout.on("data", async (chunk) => {
-  console.log(String(chunk));
-  generateImage(String(chunk));
-});
-
-listen.stdout.on("end", () => {
-  console.log(speechData);
-});
-
-async function generateImage(speechData) {
+async function generateImage (speechData) {
   const crazyWhisperPrompt = stripAnsi(speechData)
-    .replace(/[\r\n]+/g, " ")
-    .replace(/\[.*?\]/g, "")
-    .split(".")
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\[.*?\]/g, '')
+    .split('.')
     .map((sentence) => sentence.trim())
     .filter((sentence, index, self) => self.indexOf(sentence) === index)
-    .join(". ")
-    .trim();
+    .join('. ')
+    .trim()
 
   if (!crazyWhisperPrompt.length) {
-    console.log("no prompt yet!");
-    return;
+    console.log('no prompt yet!')
+    return
   }
 
-  await makeImage(crazyWhisperPrompt);
+  await makeImage(crazyWhisperPrompt)
   //   await makeReplicateImage(crazyWhisperPrompt);
 }
+
+// Whisper.cpp stuff
+const listen = spawn('sh', ['./listen.sh'])
+
+listen.stdout.on('data', async (chunk) => {
+  console.log(String(chunk))
+  generateImage(String(chunk))
+})
+
+listen.stdout.on('end', () => {})
