@@ -15,6 +15,7 @@
     "download": "^8.0.0",
     "node-webcam": "^0.8.2",
     "replicate": "*",
+    "sharp": "^0.33.2",
     "strip-ansi": "^7.1.0",
     "websocket": "^1.0.34",
     "ws": "^8.16.0"
