@@ -7,7 +7,7 @@ Tell a story and get a live feed of images.
 ```
 git clone https://github.com/zeke/livestory
 cd livestory
-npm install
+script/bootstrap
 ```
 
 ## Usage
