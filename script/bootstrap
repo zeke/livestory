@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# set up local whisper.cpp and download model
+git clone https://github.com/ggerganov/whisper.cpp
+cd whisper.cpp
+bash ./models/download-ggml-model.sh base.en
+make stream
+
+# install npm deps
+cd ..
+npm install

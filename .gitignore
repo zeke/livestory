@@ -1,5 +1,9 @@
 output
 .env
 node_modules
+<<<<<<< HEAD
 _latest.jpg
 frames
+=======
+whisper.cpp
+>>>>>>> d32927f41c004d766c9d64a61108126824f3cb5c
